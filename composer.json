@@ -1,0 +1,24 @@
+{
+    "name": "qualityunit/tnef_decoder",
+    "description": "TNEF Decoder library extracted from squirell mail plugin",
+    "keywords": ["tnef decoder", "winmail.dat"],
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Darwin Biler",
+            "email": "buonzz@gmail.com"
+        }
+    ],
+    "type": "project",
+    "require": {
+		"php": ">=7.1"
+    },
+    "require-dev": {
+		"phpunit/phpunit": "6.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "TNEFDecoder\\": "src/TNEFDecoder/"
+        }
+    }
+}
