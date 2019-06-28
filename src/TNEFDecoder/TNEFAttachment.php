@@ -207,7 +207,7 @@ class TNEFAttachment
       while ((strlen($buffer) > 0) && ($props < $number) && (!$ended))
       {
          $props++;
-         unset($value);
+         $value = '';
          unset($named_id);
          $length = 0;
          $have_multivalue = 0;

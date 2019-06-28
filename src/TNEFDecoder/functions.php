@@ -49,7 +49,7 @@ function extension_to_mime($extension)
       $file_extension_to_mime_type_map = get_file_extension_to_mime_type_map();
    }
 
-   if ($extension{0} == '.') $extension = substr($extension, 1);
+   if ($extension != '' && $extension{0} == '.') $extension = substr($extension, 1);
 
    if (!empty($file_extension_to_mime_type_map[$extension]))
       return $file_extension_to_mime_type_map[$extension];
