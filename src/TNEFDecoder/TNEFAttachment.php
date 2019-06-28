@@ -30,7 +30,7 @@ class TNEFAttachment
    var $attachments;
    var $current_receiver;
 
-   function __construct($debug)
+   function __construct($debug = false)
    {
       $this->debug = $debug;
       $this->files = array();
@@ -38,11 +38,17 @@ class TNEFAttachment
       $this->mailinfo = new TNEFMailinfo();
    }
 
+   /**
+    * @return TNEFFileBase[]
+    */
    function &getFiles()
    {
       return $this->files;
    }
 
+   /**
+    * @return TNEFFileBase[]
+    */
    function &getFilesNested()
    {
       if (!$this->files_nested)
@@ -88,6 +94,9 @@ class TNEFAttachment
       return $this->attachments;
    }
 
+   /**
+    * @return TNEFMailinfo
+    */
    function getMailinfo()
    {
       return $this->mailinfo;

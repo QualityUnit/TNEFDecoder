@@ -1,23 +1,24 @@
 <?php namespace TNEFDecoder;
 
 /**
-  * SquirrelMail TNEF Decoder Plugin
-  *
-  * Copyright (c) 2010- Paul Lesniewski <paul@squirrelmail.org>
-  * Copyright (c) 2003  Bernd Wiegmann <bernd@wib-software.de>
-  * Copyright (c) 2002  Graham Norburys <gnorbury@bondcar.com>
-  *
-  * Licensed under the GNU GPL. For full terms see the file COPYING.
-  *
-  * @package plugins
-  * @subpackage tnef_decoder
-  *
-  */
-
+ * SquirrelMail TNEF Decoder Plugin
+ *
+ * Copyright (c) 2010- Paul Lesniewski <paul@squirrelmail.org>
+ * Copyright (c) 2003  Bernd Wiegmann <bernd@wib-software.de>
+ * Copyright (c) 2002  Graham Norburys <gnorbury@bondcar.com>
+ *
+ * Licensed under the GNU GPL. For full terms see the file COPYING.
+ *
+ * @package plugins
+ * @subpackage tnef_decoder
+ *
+ */
 class TNEFFileRTF extends TNEFFileBase
 {
    var $size;
    var $debug;
+   const MAX_DICT_SIZE = 4096;
+   const INIT_DICT_SIZE = 207;
 
    function __construct($debug, $buffer)
    {
@@ -44,10 +45,9 @@ class TNEFFileRTF extends TNEFFileBase
       if ($this->debug)
          tnef_log("CRTF: size comp=$size_compressed, size=$this->size");
 
-      switch ($magic)
-      {
+      switch ($magic) {
          case CRTF_COMPRESSED:
-            $this->uncompress_rtf($buffer);
+            $this->uncompress($buffer);
             break;
 
          case CRTF_UNCOMPRESSED:
@@ -61,46 +61,54 @@ class TNEFFileRTF extends TNEFFileBase
       }
    }
 
-   function uncompress_rtf(&$buffer)
+   function uncompress(&$data)
    {
-      $uncomp = array();
-      $in = 0;
-      $out = 0;
-      $flags = 0;
-      $flag_count = 0;
-
-      $preload = "{\\rtf1\ansi\mac\deff0\deftab720{\fonttbl;}{\f0\fnil \froman \fswiss \fmodern \fscript \fdecor MS Sans SerifSymbolArialTimes New RomanCourier{\colortbl\\red0\green0\blue0\n\r\par \pard\plain\f0\fs20\b\i\u\\tab\\tx";
+      $preload = "{\\rtf1\\ansi\\mac\\deff0\\deftab720{\\fonttbl;}{\\f0\\fnil \\froman \\fswiss \\fmodern \\fscript \\fdecor MS Sans SerifSymbolArialTimes New RomanCourier{\\colortbl\\red0\\green0\\blue0\n\r\\par \\pard\\plain\\f0\\fs20\\b\\i\\u\\tab\\tx";
       $length_preload = strlen($preload);
-      for ($cnt = 0; $cnt < $length_preload; $cnt++)
-         $uncomp[$out++] = $preload{$cnt};
-
-      while ($out < ($this->size + $length_preload))
-      {
-         if (($flag_count++ % 8) == 0)
-            $flags = ord($buffer{$in++});
-         else
-            $flags = $flags >> 1;
-
-         if (($flags & 1) != 0)
-         {
-            $offset = ord($buffer{$in++});
-            $length = ord($buffer{$in++});
-            $offset = ($offset << 4) | ($length >> 4);
-            $length = ($length & 0xF) + 2;
-            $offset = ((int)($out / 4096)) * 4096 + $offset;
-            if ($offset >= $out)
-               $offset -= 4096;
-            $end = $offset + $length;
-            while ($offset < $end)
-               $uncomp[$out++] = $uncomp[$offset++];
-         }
-         else
-            $uncomp[$out++] = $buffer{$in++};
+      $init_dict = [];
+      for ($cnt = 0; $cnt < $length_preload; $cnt++) {
+         $init_dict[$cnt] = $preload{$cnt};
       }
-      $this->content = substr_replace(implode("", $uncomp), "", 0, $length_preload);
-      $length=strlen($this->content);
-      if ($this->debug)
-         tnef_log("real=$length, est=$this->size out=$out");
+      $init_dict = array_merge($init_dict, array_fill(count($init_dict), self::MAX_DICT_SIZE - $length_preload, ' '));
+      $write_offset = self::INIT_DICT_SIZE;
+      $output_buffer = '';
+      $end = false;
+      $in = 0;
+      $l = strlen($data);
+      while (!$end) {
+         if ($in >= $l) {
+            break;
+         }
+         $control = strrev(str_pad(decbin(ord($data{$in++})), 8, 0, STR_PAD_LEFT));
+         for ($i = 0; $i < 8; $i++) {
+            if ($control[$i] == '1') {
+               $token = unpack("n", $data{$in++} . $data{$in++})[1];
+               $offset = ($token >> 4) & 0b111111111111;
+               $length = $token & 0b1111;
+               if ($write_offset == $offset) {
+                  $end = true;
+                  break;
+               }
+               $actual_length = $length + 2;
+               for ($step = 0; $step < $actual_length; $step++) {
+                  $read_offset = ($offset + $step) % self::MAX_DICT_SIZE;
+                  $char = $init_dict[$read_offset];
+                  $output_buffer .= $char;
+                  $init_dict[$write_offset] = $char;
+                  $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
+               }
+            } else {
+               if ($in >= $l) {
+                  break;
+               }
+               $val = $data{$in++};
+               $output_buffer .= $val;
+               $init_dict[$write_offset] = $val;
+               $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
+            }
+         }
+      }
+      $this->content = $output_buffer;
    }
 
 }

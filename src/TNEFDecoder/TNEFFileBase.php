@@ -49,12 +49,18 @@ class TNEFFileBase
 
    function getName()
    {
-      return $this->name;
+       if ($this->name_is_unicode) {
+           return substr(iconv('utf-16', 'utf-8', $this->name), 0, -1);
+       }
+       return $this->name;
    }
 
    function getType()
    {
-      return $this->type;
+       if ($this->name_is_unicode) {
+           return substr(iconv('utf-16', 'utf-8', $this->type), 0, -1);
+       }
+       return $this->type;
    }
 
    function getSize()
