@@ -1,5 +1,5 @@
 {
-    "name": "qualityunit/tnef_decoder",
+    "name": "qualityunit/tnef-decoder",
     "description": "TNEF Decoder library extracted from squirell mail plugin to decode winmail.dat file in email attachment",
     "keywords": ["tnef decoder", "winmail.dat"],
     "license": "GPL-2.0-or-later",
