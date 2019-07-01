@@ -11,7 +11,9 @@ It is based on [SquirellMail plugin](https://squirrelmail.org/plugin_view.php?id
 
 #Usage
 Include via composer:
-
+```
+composer require qualityunit/tnef-decoder
+```
 Create object to parse attachment file
 ```
 $attachment = new TNEFAttachment();
