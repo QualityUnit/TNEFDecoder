@@ -1,7 +1,8 @@
 # TNEFDecoder
 
 
-Simple PHP library to decode TNEF files (winmail.dat) created from [SquirellMail plugin](https://squirrelmail.org/plugin_view.php?id=62)
+Simple PHP library to decode TNEF files (winmail.dat).
+It is based on functionality extracted from [SquirellMail plugin](https://squirrelmail.org/plugin_view.php?id=62)
 
 #Requirements:
 - PHP >= 7.0
