@@ -106,6 +106,9 @@ class TNEFFile extends TNEFFileBase
             if (!empty($mime_type[1])) 
                $type1 = $mime_type[1];
             $this->type = "$type0/$type1";
+            if ($is_unicode) {
+                $this->type = substr(iconv('utf-16', 'utf-8', $this->type), 0, -1);
+            }
             break;
 
          case TNEF_MAPI_ATTACH_EXTENSION:
