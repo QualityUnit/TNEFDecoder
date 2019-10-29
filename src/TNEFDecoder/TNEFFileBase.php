@@ -57,9 +57,6 @@ class TNEFFileBase
 
    function getType()
    {
-       if ($this->name_is_unicode) {
-           return substr(iconv('utf-16', 'utf-8', $this->type), 0, -1);
-       }
        return $this->type;
    }
 
