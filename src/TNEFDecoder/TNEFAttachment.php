@@ -361,11 +361,11 @@ class TNEFAttachment
          $len = strlen($buffer);
          for ($cnt = 0; $cnt < $len; $cnt++)
          {
-            $ord = ord($buffer{$cnt});
+            $ord = ord($buffer[$cnt]);
             if ($ord == 0)
                $char = "";
             else
-               $char = $buffer{$cnt};
+                $char = $buffer[$cnt];
             tnef_log(sprintf("Char Nr. %6d = 0x%02x = '%s'", $cnt, $ord, $char));
          }
       }

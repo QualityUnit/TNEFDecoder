@@ -67,7 +67,7 @@ class TNEFFileRTF extends TNEFFileBase
       $length_preload = strlen($preload);
       $init_dict = [];
       for ($cnt = 0; $cnt < $length_preload; $cnt++) {
-         $init_dict[$cnt] = $preload{$cnt};
+         $init_dict[$cnt] = $preload[$cnt];
       }
       $init_dict = array_merge($init_dict, array_fill(count($init_dict), self::MAX_DICT_SIZE - $length_preload, ' '));
       $write_offset = self::INIT_DICT_SIZE;
@@ -79,32 +79,32 @@ class TNEFFileRTF extends TNEFFileBase
          if ($in >= $l) {
             break;
          }
-         $control = strrev(str_pad(decbin(ord($data{$in++})), 8, 0, STR_PAD_LEFT));
+          $control = strrev(str_pad(decbin(ord($data[$in++])), 8, 0, STR_PAD_LEFT));
          for ($i = 0; $i < 8; $i++) {
             if ($control[$i] == '1') {
-               $token = unpack("n", $data{$in++} . $data{$in++})[1];
-               $offset = ($token >> 4) & 0b111111111111;
-               $length = $token & 0b1111;
-               if ($write_offset == $offset) {
-                  $end = true;
-                  break;
-               }
-               $actual_length = $length + 2;
-               for ($step = 0; $step < $actual_length; $step++) {
-                  $read_offset = ($offset + $step) % self::MAX_DICT_SIZE;
-                  $char = $init_dict[$read_offset];
-                  $output_buffer .= $char;
+                $token = unpack("n", $data[$in++] . $data[$in++])[1];
+                $offset = ($token >> 4) & 0b111111111111;
+                $length = $token & 0b1111;
+                if ($write_offset == $offset) {
+                    $end = true;
+                    break;
+                }
+                $actual_length = $length + 2;
+                for ($step = 0; $step < $actual_length; $step++) {
+                    $read_offset = ($offset + $step) % self::MAX_DICT_SIZE;
+                    $char = $init_dict[$read_offset];
+                    $output_buffer .= $char;
                   $init_dict[$write_offset] = $char;
                   $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
                }
             } else {
-               if ($in >= $l) {
-                  break;
-               }
-               $val = $data{$in++};
-               $output_buffer .= $val;
-               $init_dict[$write_offset] = $val;
-               $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
+                if ($in >= $l) {
+                    break;
+                }
+                $val = $data[$in++];
+                $output_buffer .= $val;
+                $init_dict[$write_offset] = $val;
+                $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
             }
          }
       }

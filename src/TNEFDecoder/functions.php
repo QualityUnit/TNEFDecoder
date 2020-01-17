@@ -49,7 +49,7 @@ function extension_to_mime($extension)
       $file_extension_to_mime_type_map = get_file_extension_to_mime_type_map();
    }
 
-   if ($extension != '' && $extension{0} == '.') $extension = substr($extension, 1);
+   if ($extension != '' && $extension[0] == '.') $extension = substr($extension, 1);
 
    if (!empty($file_extension_to_mime_type_map[$extension]))
       return $file_extension_to_mime_type_map[$extension];
@@ -91,10 +91,9 @@ function tnef_geti8(&$buf)
 {
    $value = NULL;
    $len = strlen($buf);
-   if ($len >= 1)
-   {
-      $value = ord($buf{0});
-      $buf = substr_replace($buf, '', 0, 1);
+   if ($len >= 1) {
+       $value = ord($buf[0]);
+       $buf = substr_replace($buf, '', 0, 1);
    }
    else
       substr_replace($buf, '', 0, $len);
@@ -110,18 +109,16 @@ function tnef_geti8(&$buf)
   */
 function tnef_geti16(&$buf)
 {
-   $value = NULL;
-   $len = strlen($buf);
-   if ($len >= 2)
-   {
-      $value = ord($buf{0})
-             + (ord($buf{1}) << 8);
-      $buf = substr_replace($buf, '', 0, 2);
-   }
-   else
-      substr_replace($buf, '', 0, $len);
+    $value = NULL;
+    $len = strlen($buf);
+    if ($len >= 2) {
+        $value = ord($buf[0])
+            + (ord($buf[1]) << 8);
+        $buf = substr_replace($buf, '', 0, 2);
+    } else
+        substr_replace($buf, '', 0, $len);
 
-   return $value;
+    return $value;
 }
 
 
@@ -132,18 +129,16 @@ function tnef_geti16(&$buf)
   */
 function tnef_geti32(&$buf)
 {
-   $value = NULL;
-   $len = strlen($buf);
-   if ($len >= 4)
-   {
-      $value = ord($buf{0})
-             + (ord($buf{1}) << 8)
-             + (ord($buf{2}) << 16)
-             + (ord($buf{3}) << 24);
-      $buf = substr_replace($buf, '', 0, 4);
-   }
-   else
-      substr_replace($buf, '', 0, $len);
+    $value = NULL;
+    $len = strlen($buf);
+    if ($len >= 4) {
+        $value = ord($buf[0])
+            + (ord($buf[1]) << 8)
+            + (ord($buf[2]) << 16)
+            + (ord($buf[3]) << 24);
+        $buf = substr_replace($buf, '', 0, 4);
+    } else
+        substr_replace($buf, '', 0, $len);
 
-   return $value;
+    return $value;
 }
