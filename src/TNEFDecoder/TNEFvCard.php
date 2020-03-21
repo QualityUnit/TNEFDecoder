@@ -14,7 +14,7 @@
   *
   */
 
-class TnefvCard
+class TNEFvCard
 {
 
    var $debug;
