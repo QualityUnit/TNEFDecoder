@@ -50,7 +50,7 @@ class TNEFFileBase
    function getName()
    {
        if ($this->name_is_unicode) {
-           return substr(iconv('utf-16', 'utf-8', $this->name), 0, -1);
+           return substr(mb_convert_encoding($this->name, "UTF-8" , "UTF-16LE"), 0, -1);
        }
        return $this->name;
    }

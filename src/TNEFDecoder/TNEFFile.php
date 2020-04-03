@@ -107,7 +107,7 @@ class TNEFFile extends TNEFFileBase
                $type1 = $mime_type[1];
             $this->type = "$type0/$type1";
             if ($is_unicode) {
-                $this->type = substr(iconv('utf-16', 'utf-8', $this->type), 0, -1);
+                $this->type = substr(mb_convert_encoding($this->type, "UTF-8" , "UTF-16LE"), 0, -1);
             }
             break;
 
