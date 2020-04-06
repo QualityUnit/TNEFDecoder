@@ -7,7 +7,7 @@ It is based on [SquirellMail plugin](https://squirrelmail.org/plugin_view.php?id
 
 #Requirements:
 - PHP >= 7.0
-- PHP-iconv extension
+- PHP-mbstring extension
 
 #Usage
 Include via composer:
