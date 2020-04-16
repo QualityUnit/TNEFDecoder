@@ -61,6 +61,14 @@ class TNEFAttachmentTest extends TestCase {
       $this->assertEquals("README", $files[1]->getName());
    }
 
+   public function testDecodeHtml() {
+       $files =  file_get_contents(dirname(__FILE__) . "/testfiles/unicode-mapi-attr.tnef");
+       $attachment = new TNEFAttachment();
+       $attachment->decodeTnef($buffer);
+       $html = $attachment->parseHtml();
+       $this->assertRegExp('/html/', $html->getContent());
+   }
+
    public function testDecodeAuto() {
       $files =  scandir ( dirname(__FILE__) . "/testfiles/");
       foreach ($files as $file) {
