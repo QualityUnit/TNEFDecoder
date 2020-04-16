@@ -25,6 +25,7 @@ class TNEFAttachment
 
    var $debug;
    var $mailinfo;
+   var $html;
    var $files;
    var $files_nested;
    var $attachments;
@@ -36,6 +37,7 @@ class TNEFAttachment
       $this->files = array();
       $this->attachments = array();
       $this->mailinfo = new TNEFMailinfo();
+      $this->html = new TNEFHtml();
    }
 
    /**
@@ -100,6 +102,14 @@ class TNEFAttachment
    function getMailinfo()
    {
       return $this->mailinfo;
+   }
+
+   /**
+    * @return TNEFHtml
+    */
+   function parseHtml()
+   {
+      return $this->html;
    }
 
    function decodeTnef(&$buffer)
@@ -350,6 +360,7 @@ class TNEFAttachment
                break;
 
             default:
+               $this->html->setTnefBuffer($buffer);
                $this->mailinfo->receiveMapiAttribute($attr_type, $attr_name, $value, $length, ($attr_type == TNEF_MAPI_UNICODE_STRING));
                if ($this->current_receiver)
                   $this->current_receiver->receiveMapiAttribute($attr_type, $attr_name, $value, $length, ($attr_type == TNEF_MAPI_UNICODE_STRING));
