@@ -19,9 +19,8 @@ class TNEFHtml
         return $this->html;
     }
 
-    protected function parseHtml($buffer, $start, $end)
+    protected function parseHtml($str, $start, $end)
     {
-        $str = ' ' . $buffer;
         $ini = strpos($str, $start);
         if ($ini == 0) return '';
         $ini += strlen($start);
