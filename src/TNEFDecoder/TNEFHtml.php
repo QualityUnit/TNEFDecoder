@@ -11,7 +11,7 @@ class TNEFHtml
 
     public function setTnefBuffer($buffer)
     {
-        $this->parseHtml($buffer, self::START, self::END);
+        $this->parseHtml($buffer);
     }
 
     public function getContent()
@@ -19,12 +19,12 @@ class TNEFHtml
         return $this->html;
     }
 
-    protected function parseHtml($str, $start, $end)
+    protected function parseHtml($str)
     {
-        $ini = strpos($str, $start);
+        $ini = strpos($str, self::START);
         if ($ini == 0) return '';
-        $ini += strlen($start);
-        $len = strpos($str, $end, $ini) - $ini;
-        $this->html = $start . substr($str, $ini, $len) . $end;
+        $ini += strlen(self::START);
+        $len = strpos($str, self::END, $ini) - $ini;
+        $this->html = self::START . substr($str, $ini, $len) . self::END;
     }
 }
