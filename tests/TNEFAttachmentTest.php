@@ -62,7 +62,7 @@ class TNEFAttachmentTest extends TestCase {
    }
 
    public function testDecodeHtml() {
-       $files =  file_get_contents(dirname(__FILE__) . "/testfiles/unicode-mapi-attr.tnef");
+       $buffer =  file_get_contents(dirname(__FILE__) . "/testfiles/unicode-mapi-attr.tnef");
        $attachment = new TNEFAttachment();
        $attachment->decodeTnef($buffer);
        $html = $attachment->parseHtml();
