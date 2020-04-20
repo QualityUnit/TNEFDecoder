@@ -29,13 +29,15 @@ class TNEFAttachment
    var $files_nested;
    var $attachments;
    var $current_receiver;
+    var $body;
 
    function __construct($debug = false)
    {
-      $this->debug = $debug;
-      $this->files = array();
-      $this->attachments = array();
-      $this->mailinfo = new TNEFMailinfo();
+       $this->debug = $debug;
+       $this->files = array();
+       $this->attachments = array();
+       $this->mailinfo = new TNEFMailinfo();
+       $this->body = [];
    }
 
    /**
@@ -80,56 +82,57 @@ class TNEFAttachment
             $add_to[] = &$add[$cnt];
    }
 
-   function addFilesCond(&$add_to, &$add)
-   {
-      global $tnef_minimum_rtf_size_to_decode;
-      $num_files = count($add);
-      for ($cnt = 0; $cnt < $num_files; $cnt++)
-         if ((strtolower(get_class($add[$cnt])) == "tneffilertf") && ($add[$cnt]->getSize() > $tnef_minimum_rtf_size_to_decode))
-            $add_to[] = &$add[$cnt];
-   }
+    function addFilesCond(&$add_to, &$add)
+    {
+        global $tnef_minimum_rtf_size_to_decode;
+        $num_files = count($add);
+        for ($cnt = 0; $cnt < $num_files; $cnt++)
+            if ((strtolower(get_class($add[$cnt])) == "tneffilertf") && ($add[$cnt]->getSize() > $tnef_minimum_rtf_size_to_decode))
+                $add_to[] = &$add[$cnt];
+    }
 
-   function getAttachments()
-   {
-      return $this->attachments;
-   }
+    function getAttachments()
+    {
+        return $this->attachments;
+    }
 
-   /**
-    * @return TNEFMailinfo
-    */
-   function getMailinfo()
-   {
-      return $this->mailinfo;
-   }
+    /**
+     * @return TNEFMailinfo
+     */
+    function getMailinfo()
+    {
+        return $this->mailinfo;
+    }
 
-   function decodeTnef(&$buffer)
-   {
-      $tnef_signature = tnef_geti32($buffer);
-      if ($tnef_signature == TNEF_SIGNATURE)
-      {
-         $tnef_key = tnef_geti16($buffer);
-         if ($this->debug)
-            tnef_log(sprintf("Signature: 0x%08x\nKey: 0x%04x\n", $tnef_signature, $tnef_key));
+    function getBodyElements()
+    {
+        return $this->body;
+    }
 
-         while (strlen($buffer) > 0)
-         {
-            $lvl_type = tnef_geti8($buffer);
+    function decodeTnef(&$buffer)
+    {
+        $tnef_signature = tnef_geti32($buffer);
+        if ($tnef_signature == TNEF_SIGNATURE) {
+            $tnef_key = tnef_geti16($buffer);
+            if ($this->debug)
+                tnef_log(sprintf("Signature: 0x%08x\nKey: 0x%04x\n", $tnef_signature, $tnef_key));
 
-            switch($lvl_type)
-            {
-               case TNEF_LVL_MESSAGE:
-                  $this->tnef_decode_attribute($buffer);
-                  break;
+            while (strlen($buffer) > 0) {
+                $lvl_type = tnef_geti8($buffer);
 
-               case TNEF_LVL_ATTACHMENT:
-                  $this->tnef_decode_attribute($buffer);
-                  break;
+                switch ($lvl_type) {
+                    case TNEF_LVL_MESSAGE:
+                        $this->tnef_decode_attribute($buffer);
+                        break;
 
-               default:
-                  if ($this->debug)
-                  {
-                     $len = strlen($buffer);
-                     if ($len > 0)
+                    case TNEF_LVL_ATTACHMENT:
+                        $this->tnef_decode_attribute($buffer);
+                        break;
+
+                    default:
+                        if ($this->debug) {
+                            $len = strlen($buffer);
+                            if ($len > 0)
                         tnef_log("Invalid file format! Unknown Level $lvl_type. Rest=$len");
                   }
                   break;
@@ -332,28 +335,37 @@ class TNEFAttachment
 
          switch ($attr_name)
          {
-            case TNEF_MAPI_ATTACH_DATA:
-               if ($this->debug)
-                  tnef_log("MAPI Found nested attachment. Processing new one.");
-               tnef_getx(16, $value); // skip the next 16 bytes (unknown data)
-               $att = new TNEFAttachment($this->debug);
-               $att->decodeTnef($value);
-               $this->attachments[] = $att;
-               if ($this->debug)
-                  tnef_log("MAPI Finished nested attachment. Continuing old one.");
-               break;
+             case TNEF_MAPI_ATTACH_DATA:
+                 if ($this->debug)
+                     tnef_log("MAPI Found nested attachment. Processing new one.");
+                 tnef_getx(16, $value); // skip the next 16 bytes (unknown data)
+                 $att = new TNEFAttachment($this->debug);
+                 $att->decodeTnef($value);
+                 $this->attachments[] = $att;
+                 if ($this->debug)
+                     tnef_log("MAPI Finished nested attachment. Continuing old one.");
+                 break;
 
-            case TNEF_MAPI_RTF_COMPRESSED:
-               if ($this->debug)
-                  tnef_log("MAPI Found Compressed RTF Attachment.");
-               $this->files[] = new TNEFFileRTF($this->debug, $value);
-               break;
-
-            default:
-               $this->mailinfo->receiveMapiAttribute($attr_type, $attr_name, $value, $length, ($attr_type == TNEF_MAPI_UNICODE_STRING));
-               if ($this->current_receiver)
-                  $this->current_receiver->receiveMapiAttribute($attr_type, $attr_name, $value, $length, ($attr_type == TNEF_MAPI_UNICODE_STRING));
-               break;
+             case TNEF_MAPI_RTF_COMPRESSED:
+                 if ($this->debug)
+                     tnef_log("MAPI Found Compressed RTF Attachment.");
+                 $this->files[] = new TNEFFileRTF($this->debug, $value);
+                 break;
+             case TNEF_MAPI_BODY:
+             case TNEF_MAPI_BODY_HTML:
+                 $result = [];
+                 $result['type'] = 'text';
+                 $result['subtype'] = $attr_name == TNEF_MAPI_BODY ? 'plain' : 'html';
+                 $result['name'] = ('Untitled') . ($attr_name == TNEF_MAPI_BODY ? '.txt' : '.html');
+                 $result['stream'] = $value;
+                 $result['size'] = strlen($value);
+                 $this->body[] = $result;
+                 break;
+             default:
+                 $this->mailinfo->receiveMapiAttribute($attr_type, $attr_name, $value, $length, ($attr_type == TNEF_MAPI_UNICODE_STRING));
+                 if ($this->current_receiver)
+                     $this->current_receiver->receiveMapiAttribute($attr_type, $attr_name, $value, $length, ($attr_type == TNEF_MAPI_UNICODE_STRING));
+                 break;
          }
       }
       if (($this->debug) && ($ended))
