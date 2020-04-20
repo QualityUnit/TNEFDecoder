@@ -8,6 +8,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: vendor
+          key: composer.lock
       - uses: php-actions/composer@v1
       - name: PHP Lint
         run: vendor/bin/phplint --exclude=vendor
