@@ -10,8 +10,8 @@
         "ext-mbstring": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "6.*",
-        "overtrue/phplint": "^2.0"
+        "overtrue/phplint": "^2.0",
+        "phpunit/phpunit": "^9.1"
     },
     "autoload": {
         "psr-4": {
