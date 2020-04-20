@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="../../vendor/autoload.php"
+<phpunit bootstrap="vendor/autoload.php"
          backupGlobals="false"
          backupStaticAttributes="false"
          colors="true"
@@ -9,7 +9,7 @@
 
     <testsuites>
         <testsuite name="Project Test Suite">
-            <directory>../../test</directory>
+            <directory>test</directory>
         </testsuite>
     </testsuites>
 

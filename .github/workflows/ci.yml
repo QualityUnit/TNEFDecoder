@@ -11,4 +11,5 @@ jobs:
       - uses: php-actions/composer@v1
       - name: PHP Lint
         run: vendor/bin/phplint --exclude=vendor
-      - uses: php-actions/phpunit@master
+      - name: PHP Unit
+        run: vendor/phpunit/phpunit/phpunit -c phpunit.xml
