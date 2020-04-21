@@ -9,10 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: actions/cache@v1
-        id: cache
+      - name: Cache PHP dependencies
+        uses: actions/cache@v1
         with:
           path: vendor
-          key: composer.lock
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/composer.lock') }}
       - uses: php-actions/composer@v1
       - name: PHP Lint
         run: vendor/bin/phplint --exclude=vendor
