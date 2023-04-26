@@ -1,4 +1,6 @@
-<? namespace TNEFDecoder;
+<?php
+
+namespace TNEFDecoder;
 
 /**
   * SquirrelMail TNEF Decoder Plugin
