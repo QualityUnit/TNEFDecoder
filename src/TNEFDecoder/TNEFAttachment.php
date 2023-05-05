@@ -24,6 +24,7 @@ class TNEFAttachment
 {
 
    var $debug;
+   var $validateChecksum;
    var $mailinfo;
    var $files;
    var $files_nested;
@@ -31,9 +32,10 @@ class TNEFAttachment
    var $current_receiver;
     var $body;
 
-   function __construct($debug = false)
+   function __construct($debug = false, $validateChecksum = false)
    {
        $this->debug = $debug;
+       $this->validateChecksum = $validateChecksum;
        $this->files = array();
        $this->attachments = array();
        $this->mailinfo = new TNEFMailinfo();
@@ -158,7 +160,13 @@ class TNEFAttachment
       $attribute = tnef_geti32($buffer);     // attribute if
       $length = tnef_geti32($buffer);        // length
       $value = tnef_getx($length, $buffer);  // data
-      tnef_geti16($buffer);                  // checksum
+      $checksumAtt = tnef_geti16($buffer);   // checksum
+      if ($value !== null && $this->validateChecksum) {
+         $checksum = array_sum(unpack('C*', $value)) & 0xFFFF;
+         if ($checksum !== $checksumAtt) {
+            throw new \Exception('Checksums do not match');
+         }
+      }
 
       switch($attribute)
       {
@@ -339,7 +347,7 @@ class TNEFAttachment
                  if ($this->debug)
                      tnef_log("MAPI Found nested attachment. Processing new one.");
                  tnef_getx(16, $value); // skip the next 16 bytes (unknown data)
-                 $att = new TNEFAttachment($this->debug);
+                 $att = new TNEFAttachment($this->debug, $this->validateChecksum);
                  $att->decodeTnef($value);
                  $this->attachments[] = $att;
                  if ($this->debug)
