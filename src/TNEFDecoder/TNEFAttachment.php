@@ -348,7 +348,7 @@ class TNEFAttachment
              case TNEF_MAPI_ATTACH_DATA:
                  if ($this->debug)
                      tnef_log("MAPI Found nested attachment. Processing new one.");
-                 tnef_getx(16, $buffer); // skip the next 16 bytes (unknown data)
+                 $value = substr($value, 16); // skip the next 16 bytes (unknown data)
                  $att = new TNEFAttachment($this->debug, $this->validateChecksum);
                  $att->decodeTnef($value);
                  $this->attachments[] = $att;
