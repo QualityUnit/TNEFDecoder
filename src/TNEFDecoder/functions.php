@@ -66,19 +66,25 @@ function extension_to_mime($extension)
   * TNEF decoding helper function
   *
   */
-function tnef_getx($size, &$buf)
+function tnef_getx($size, TNEFBuffer $buf)
 {
-   $value = NULL;
-   $len = strlen($buf);
-   if ($len >= $size)
-   {
-      $value = substr($buf, 0, $size);
-      $buf = substr_replace($buf, '', 0, $size);
+   return $buf->getBytes($size);
+}
+
+
+
+/**
+  * TNEF decoding helper function
+  *
+  */
+function tnef_geti8(TNEFBuffer $buf): int
+{
+   $bytes = $buf->getBytes(1, $buf);
+   if ($bytes === null) {
+        return null;
    }
-   else
-      substr_replace($buf, '', 0, $len);
 
-   return $value;
+   return ord($bytes[0]);
 }
 
 
@@ -87,18 +93,15 @@ function tnef_getx($size, &$buf)
   * TNEF decoding helper function
   *
   */
-function tnef_geti8(&$buf)
+function tnef_geti16(TNEFBuffer $buf): int
 {
-   $value = NULL;
-   $len = strlen($buf);
-   if ($len >= 1) {
-       $value = ord($buf[0]);
-       $buf = substr_replace($buf, '', 0, 1);
+   $bytes = $buf->getBytes(2, $buf);
+   if ($bytes === null) {
+        return null;
    }
-   else
-      substr_replace($buf, '', 0, $len);
 
-   return $value;
+   return ord($bytes[0])
+            + (ord($bytes[1]) << 8);
 }
 
 
@@ -107,38 +110,15 @@ function tnef_geti8(&$buf)
   * TNEF decoding helper function
   *
   */
-function tnef_geti16(&$buf)
+function tnef_geti32(TNEFBuffer $buf): int
 {
-    $value = NULL;
-    $len = strlen($buf);
-    if ($len >= 2) {
-        $value = ord($buf[0])
-            + (ord($buf[1]) << 8);
-        $buf = substr_replace($buf, '', 0, 2);
-    } else
-        substr_replace($buf, '', 0, $len);
+   $bytes = $buf->getBytes(4, $buf);
+   if ($bytes === null) {
+        return null;
+   }
 
-    return $value;
-}
-
-
-
-/**
-  * TNEF decoding helper function
-  *
-  */
-function tnef_geti32(&$buf)
-{
-    $value = NULL;
-    $len = strlen($buf);
-    if ($len >= 4) {
-        $value = ord($buf[0])
-            + (ord($buf[1]) << 8)
-            + (ord($buf[2]) << 16)
-            + (ord($buf[3]) << 24);
-        $buf = substr_replace($buf, '', 0, 4);
-    } else
-        substr_replace($buf, '', 0, $len);
-
-    return $value;
+   return ord($bytes[0])
+            + (ord($bytes[1]) << 8)
+            + (ord($bytes[2]) << 16)
+            + (ord($bytes[3]) << 24);
 }

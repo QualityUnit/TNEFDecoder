@@ -37,7 +37,6 @@ class TNEFFile extends TNEFFileBase
          // filename
          //
          case TNEF_AFILENAME:
-
             // strip path
             //
             if (($pos = strrpos($value, '/')) !== FALSE)
@@ -45,12 +44,13 @@ class TNEFFile extends TNEFFileBase
             else
                $this->name = $value;
 
+            // Strip trailing null bytes if present
+            $this->name = trim($this->name);
             break;
-
          // code page
          //
          case TNEF_AOEMCODEPAGE:
-            $this->code_page = tnef_geti16($value);
+            $this->code_page = tnef_geti16(new TNEFBuffer($value));
             break;
 
          // the attachment itself
@@ -67,11 +67,11 @@ class TNEFFile extends TNEFFileBase
 
          case TNEF_AATTACHCREATEDATE:
             $this->created = new TNEFDate();
-            $this->created->setTnefBuffer($value);
+            $this->created->setTnefBuffer(new TNEFBuffer($value));
 
          case TNEF_AATTACHMODDATE:
             $this->modified = new TNEFDate();
-            $this->modified->setTnefBuffer($value);
+            $this->modified->setTnefBuffer(new TNEFBuffer($value));
             break;
       }
    }
@@ -84,7 +84,6 @@ class TNEFFile extends TNEFFileBase
          // used in preference to AFILENAME value
          //
          case TNEF_MAPI_ATTACH_LONG_FILENAME:
-
             // strip path
             //
             if (($pos = strrpos($value, '/')) !== FALSE)
@@ -93,7 +92,6 @@ class TNEFFile extends TNEFFileBase
                $this->name = $value;
 
             if ($is_unicode) $this->name_is_unicode = TRUE;
-
             break;
 
          // Is this ever set, and what is format?
@@ -101,9 +99,9 @@ class TNEFFile extends TNEFFileBase
          case TNEF_MAPI_ATTACH_MIME_TAG:
             $type0 = $type1 = '';
             $mime_type = explode('/', $value, 2);
-            if (!empty($mime_type[0])) 
+            if (!empty($mime_type[0]))
                $type0 = $mime_type[0];
-            if (!empty($mime_type[1])) 
+            if (!empty($mime_type[1]))
                $type1 = $mime_type[1];
             $this->type = "$type0/$type1";
             if ($is_unicode) {

@@ -52,7 +52,7 @@ class TNEFAttachmentTest extends TestCase
       $this->assertEquals($withoutRtf, $withoutRtfdecoded);
    }
 
-   public function tnefFileProvider() {
+   public static function tnefFileProvider() {
       $tnefFiles = glob(dirname(__FILE__) . "/testfiles/*.tnef");
       $result = [];
       foreach ($tnefFiles as $tnefFile) {
@@ -69,11 +69,11 @@ class TNEFAttachmentTest extends TestCase
    }
 
    private function endsWithRtf($value) {
-      try {
-         return explode('.', $value)[1] != 'rtf';
-      } catch (Throwable $e) {
+      $arr = explode('.', $value);
+      if (count($arr) < 2) {
          return false;
       }
 
+      return $arr[1] !== 'rtf';
    }
 }
