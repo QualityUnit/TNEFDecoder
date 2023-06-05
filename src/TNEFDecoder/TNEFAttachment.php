@@ -111,15 +111,17 @@ class TNEFAttachment
         return $this->body;
     }
 
-    function decodeTnef(&$buffer)
+    function decodeTnef($data)
     {
+        $buffer = new TNEFBuffer($data);
+
         $tnef_signature = tnef_geti32($buffer);
         if ($tnef_signature == TNEF_SIGNATURE) {
             $tnef_key = tnef_geti16($buffer);
             if ($this->debug)
                 tnef_log(sprintf("Signature: 0x%08x\nKey: 0x%04x\n", $tnef_signature, $tnef_key));
 
-            while (strlen($buffer) > 0) {
+            while ($buffer->getRemainingBytes() > 0) {
                 $lvl_type = tnef_geti8($buffer);
 
                 switch ($lvl_type) {
@@ -133,7 +135,7 @@ class TNEFAttachment
 
                     default:
                         if ($this->debug) {
-                            $len = strlen($buffer);
+                            $len = $buffer->getRemainingBytes();
                             if ($len > 0)
                         tnef_log("Invalid file format! Unknown Level $lvl_type. Rest=$len");
                   }
@@ -155,7 +157,7 @@ class TNEFAttachment
             $this->files[$i]->setMessageCodePage($code_page);
    }
 
-   function tnef_decode_attribute(&$buffer)
+   function tnef_decode_attribute(TNEFBuffer $buffer)
    {
       $attribute = tnef_geti32($buffer);     // attribute if
       $length = tnef_geti32($buffer);        // length
@@ -180,13 +182,13 @@ class TNEFAttachment
          case TNEF_AMAPIATTRS:
             if ($this->debug)
                tnef_log("mapi attrs");
-            $this->extract_mapi_attrs($value);
+            $this->extract_mapi_attrs(new TNEFBuffer($value));
             break;
 
          case TNEF_AMAPIPROPS:
             if ($this->debug)
                tnef_log("mapi props");
-            $this->extract_mapi_attrs($value);
+            $this->extract_mapi_attrs(new TNEFBuffer($value));
             break;
 
          case TNEF_AMCLASS:
@@ -208,14 +210,14 @@ class TNEFAttachment
       }
    }
 
-   function extract_mapi_attrs(&$buffer)
+   function extract_mapi_attrs(TNEFBuffer $buffer)
    {
 
       $number = tnef_geti32($buffer); // number of attributes
       $props = 0;
       $ended = 0;
 
-      while ((strlen($buffer) > 0) && ($props < $number) && (!$ended))
+      while (($buffer->getRemainingBytes() > 0) && ($props < $number) && (!$ended))
       {
          $props++;
          $value = '';
@@ -225,7 +227,7 @@ class TNEFAttachment
          $num_multivalues = 1;
          $attr_type = tnef_geti16($buffer);
          $attr_name = tnef_geti16($buffer);
-      
+
          if (($attr_type & TNEF_MAPI_MV_FLAG) != 0)
          {
             if ($this->debug)
@@ -346,7 +348,7 @@ class TNEFAttachment
              case TNEF_MAPI_ATTACH_DATA:
                  if ($this->debug)
                      tnef_log("MAPI Found nested attachment. Processing new one.");
-                 tnef_getx(16, $value); // skip the next 16 bytes (unknown data)
+                 tnef_getx(16, $buffer); // skip the next 16 bytes (unknown data)
                  $att = new TNEFAttachment($this->debug, $this->validateChecksum);
                  $att->decodeTnef($value);
                  $this->attachments[] = $att;
@@ -378,14 +380,14 @@ class TNEFAttachment
       }
       if (($this->debug) && ($ended))
       {
-         $len = strlen($buffer);
+         $len = $buffer->getRemainingBytes();
          for ($cnt = 0; $cnt < $len; $cnt++)
          {
-            $ord = ord($buffer[$cnt]);
+            $ord = tnef_geti8($buffer);
             if ($ord == 0)
                $char = "";
             else
-                $char = $buffer[$cnt];
+                $char = chr($ord);
             tnef_log(sprintf("Char Nr. %6d = 0x%02x = '%s'", $cnt, $ord, $char));
          }
       }

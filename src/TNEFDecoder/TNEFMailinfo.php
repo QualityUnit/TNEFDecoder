@@ -60,6 +60,8 @@ class TNEFMailinfo
 
    function receiveTnefAttribute($attribute, $value, $length)
    {
+      $value = new TNEFBuffer($value);
+
       switch($attribute)
       {
          case TNEF_AOEMCODEPAGE:
@@ -67,7 +69,7 @@ class TNEFMailinfo
             break;
 
          case TNEF_ASUBJECT:
-            $this->subject = substr($value, 0, $length - 1);
+            $this->subject = tnef_getx($length - 1, $value);
             break;
 
          case TNEF_ADATERECEIVED:

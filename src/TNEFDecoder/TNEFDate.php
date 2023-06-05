@@ -24,7 +24,7 @@ class TNEFDate
    var $minute;
    var $second;
 
-   function setTnefBuffer($buffer)
+   function setTnefBuffer(TNEFBuffer $buffer)
    {
       $this->year = tnef_geti16($buffer);
       $this->month = tnef_geti16($buffer);

@@ -25,7 +25,7 @@ class TNEFFileBase
    var $created;
    var $modified;
    var $debug;
- 
+
    function __construct($debug)
    {
       $this->name = 'Untitled';

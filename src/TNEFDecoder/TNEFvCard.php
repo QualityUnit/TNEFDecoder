@@ -66,7 +66,7 @@ class TNEFvCard
    {
       if (empty($this->code_page))
          return $this->message_code_page;
-      else 
+      else
          return $this->code_page;
    }
 
@@ -158,7 +158,7 @@ class TNEFvCard
          // code page
          //
          case TNEF_AOEMCODEPAGE:
-            $this->code_page = tnef_geti16($value);
+            $this->code_page = tnef_geti16(new TNEFBuffer($value));
             break;
 
       }
@@ -238,7 +238,7 @@ class TNEFvCard
                tnef_log("Setting telefone '$telefone_key' to value '$value'");
          }
       }
-    
+
       return $rc;
    }
 
@@ -296,7 +296,7 @@ class TNEFvCard
                tnef_log("Setting homepage '$homepage_key' to value '$value'");
          }
       }
-    
+
       return $rc;
    }
 
