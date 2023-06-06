@@ -26,7 +26,7 @@ class TNEFAttachmentTest extends TestCase
    /**
     * @dataProvider tnefFileProvider
     */
-   public function testDecodeAuto($tnefFile, $listFile) {
+   public function testDecodeAuto($tnefFile, $listFile, $nestedListFile) {
       $buffer = file_get_contents($tnefFile);
       $attachment = new TNEFAttachment(false, true);
 
@@ -35,21 +35,19 @@ class TNEFAttachmentTest extends TestCase
       }
       $attachment->decodeTnef($buffer);
 
-      $list = file($listFile, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
-      $this->assertEquals(count($list), count($attachment->files));
-      $decodedFiles = array_map(function(TNEFFileBase$file) {return $file->getName();}, $attachment->files);
+      $list = $this->readList($listFile);
+      $decodedFiles = array_map(function($file) {return [$file->getName(), md5($file->getContent())];}, $attachment->getFiles());
 
-      $withoutRtf = array_filter($list, array($this, "endsWithRtf"));
-      $withoutRtfdecoded = array_filter($decodedFiles, array($this, "endsWithRtf"));
+      $this->assertEquals($list, $decodedFiles);
 
-      $rtfs = array_diff($withoutRtf, $list);
-      $rtfsDecoded = array_diff($withoutRtfdecoded, $decodedFiles);
+      if ($nestedListFile === null) {
+         return;
+      }
 
-      $this->assertEquals(count($rtfs), count($rtfsDecoded));
+      $list = $this->readList($nestedListFile);
+      $decodedFiles = array_map(function($file) {return [$file->getName(), md5($file->getContent())];}, $attachment->getFilesNested());
 
-      sort($withoutRtfdecoded);
-      sort($withoutRtf);
-      $this->assertEquals($withoutRtf, $withoutRtfdecoded);
+      $this->assertEquals($list, $decodedFiles);
    }
 
    public static function tnefFileProvider() {
@@ -58,22 +56,27 @@ class TNEFAttachmentTest extends TestCase
       foreach ($tnefFiles as $tnefFile) {
          $pathinfo = pathinfo($tnefFile);
          $listFile = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.list';
+         $nestedListFile = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.nested.list';
 
          $result[] = [
             $tnefFile,
             file_exists($listFile) ? $listFile : null,
+            file_exists($nestedListFile) ? $nestedListFile : null,
          ];
       }
 
       return $result;
    }
 
-   private function endsWithRtf($value) {
-      $arr = explode('.', $value);
-      if (count($arr) < 2) {
-         return false;
+   private function readList(string $filename): array
+   {
+      $arr = [];
+      $handle = fopen($filename, 'r');
+      while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+         $arr[] = $data;
       }
+      fclose($handle);
 
-      return $arr[1] !== 'rtf';
+      return $arr;
    }
 }
