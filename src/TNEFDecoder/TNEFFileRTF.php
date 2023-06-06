@@ -45,13 +45,15 @@ class TNEFFileRTF extends TNEFFileBase
       if ($this->debug)
          tnef_log("CRTF: size comp=$size_compressed, size=$this->size");
 
+      $data = tnef_getx($buffer->getRemainingBytes(), $buffer);
+
       switch ($magic) {
          case CRTF_COMPRESSED:
-            $this->uncompress($buffer);
+            $this->uncompress($data);
             break;
 
          case CRTF_UNCOMPRESSED:
-            $this->content = $buffer;
+            $this->content = $data;
             break;
 
          default:
@@ -61,10 +63,8 @@ class TNEFFileRTF extends TNEFFileBase
       }
    }
 
-   function uncompress(TNEFBuffer $buffer)
+   function uncompress($data)
    {
-      $data = tnef_getx($buffer->getRemainingBytes(), $buffer);
-
       $preload = "{\\rtf1\\ansi\\mac\\deff0\\deftab720{\\fonttbl;}{\\f0\\fnil \\froman \\fswiss \\fmodern \\fscript \\fdecor MS Sans SerifSymbolArialTimes New RomanCourier{\\colortbl\\red0\\green0\\blue0\n\r\\par \\pard\\plain\\f0\\fs20\\b\\i\\u\\tab\\tx";
       $length_preload = strlen($preload);
       $init_dict = [];
@@ -110,7 +110,7 @@ class TNEFFileRTF extends TNEFFileBase
             }
          }
       }
-      $this->content = new TNEFBuffer(implode('', $output_buffer));
+      $this->content = implode('', $output_buffer);
    }
 
 }
