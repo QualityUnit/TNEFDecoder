@@ -73,7 +73,7 @@ class TNEFFileRTF extends TNEFFileBase
       }
       $init_dict = array_merge($init_dict, array_fill(count($init_dict), self::MAX_DICT_SIZE - $length_preload, ' '));
       $write_offset = self::INIT_DICT_SIZE;
-      $output_buffer = [];
+      $this->content = '';
       $end = false;
       $in = 0;
       $l = strlen($data);
@@ -95,7 +95,7 @@ class TNEFFileRTF extends TNEFFileBase
                 for ($step = 0; $step < $actual_length; $step++) {
                     $read_offset = ($offset + $step) % self::MAX_DICT_SIZE;
                     $char = $init_dict[$read_offset];
-                    $output_buffer[] = $char;
+                    $this->content .= $char;
                   $init_dict[$write_offset] = $char;
                   $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
                }
@@ -104,13 +104,12 @@ class TNEFFileRTF extends TNEFFileBase
                     break;
                 }
                 $val = $data[$in++];
-                $output_buffer[] = $val;
+                $this->content .= $val;
                 $init_dict[$write_offset] = $val;
                 $write_offset = ($write_offset + 1) % self::MAX_DICT_SIZE;
             }
          }
       }
-      $this->content = implode('', $output_buffer);
    }
 
 }
