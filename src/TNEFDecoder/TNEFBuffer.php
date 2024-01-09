@@ -1,4 +1,6 @@
-<?php namespace TNEFDecoder;
+<?php
+
+namespace TNEFDecoder;
 
 /**
   * SquirrelMail TNEF Decoder Plugin
@@ -16,8 +18,8 @@
 
 class TNEFBuffer
 {
-   private string $data;
-   private int $offset;
+   private $data;
+   private $offset;
 
    function __construct(string $data)
    {
@@ -25,7 +27,7 @@ class TNEFBuffer
       $this->offset = 0;
    }
 
-   function getBytes(int $numBytes): ?string
+   function getBytes(int $numBytes)
    {
       if ($this->getRemainingBytes() < $numBytes) {
          $this->offset = strlen($this->data);
