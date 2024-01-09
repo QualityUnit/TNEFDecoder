@@ -77,7 +77,7 @@ function tnef_getx($size, TNEFBuffer $buf)
   * TNEF decoding helper function
   *
   */
-function tnef_geti8(TNEFBuffer $buf): int
+function tnef_geti8(TNEFBuffer $buf)
 {
    $bytes = $buf->getBytes(1, $buf);
    if ($bytes === null) {
@@ -93,7 +93,7 @@ function tnef_geti8(TNEFBuffer $buf): int
   * TNEF decoding helper function
   *
   */
-function tnef_geti16(TNEFBuffer $buf): int
+function tnef_geti16(TNEFBuffer $buf)
 {
    $bytes = $buf->getBytes(2, $buf);
    if ($bytes === null) {
@@ -110,7 +110,7 @@ function tnef_geti16(TNEFBuffer $buf): int
   * TNEF decoding helper function
   *
   */
-function tnef_geti32(TNEFBuffer $buf): int
+function tnef_geti32(TNEFBuffer $buf)
 {
    $bytes = $buf->getBytes(4, $buf);
    if ($bytes === null) {
