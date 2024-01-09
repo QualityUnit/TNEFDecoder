@@ -13,7 +13,8 @@ jobs:
           path: vendor
           key: ${{ runner.OS }}-build-${{ hashFiles('**/composer.lock') }}
       - uses: php-actions/composer@v6
-        php_version: "7.1"
+        with:
+          php_version: "7.1"
       - name: PHP Lint
         run: vendor/bin/phplint --exclude=vendor
       - name: PHP Unit
