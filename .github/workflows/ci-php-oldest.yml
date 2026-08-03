@@ -9,14 +9,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: '7.1'
       - uses: actions/cache@v3
         with:
           path: vendor
           key: ${{ runner.OS }}-build-oldest-${{ hashFiles('**/composer.lock') }}
-      - uses: php-actions/composer@v6
+      - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # v6.1.2
         env:
           COMPOSER: "composer-php-oldest.json"
         with:
